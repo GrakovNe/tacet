@@ -1,0 +1,8 @@
+# Tacet: persist bans across reboots + collect stats for the charts.
+# Save to a temp file and swap in only when the set EXISTS (its "create" line is
+# present), so a save that runs before the netfilter hook has created the sets
+# (early boot, ipset save fails -> empty file) cannot wipe a good snapshot — while a
+# deliberately-emptied set (create line, no adds) DOES persist, so a flush survives
+# a reboot instead of being resurrected from a stale snapshot.
+*/30 * * * * for s in tacet-scan tacet-flood tacet-cnet tacet-fnet; do /opt/sbin/ipset save $s > /opt/etc/$s.save.tmp 2>/dev/null && grep -q "^create $s " /opt/etc/$s.save.tmp && mv /opt/etc/$s.save.tmp /opt/etc/$s.save || rm -f /opt/etc/$s.save.tmp; done
+* * * * * /opt/etc/tacet-collect.sh

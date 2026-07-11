@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tacet</title>
+<link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNyIgZmlsbD0iIzJhNzhkNiIvPjxnIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLXdpZHRoPSIyLjYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNCA0KSI+PHBhdGggZD0iTTkgNGw1LjQgNi00LjQgMy4yIDUgNC4zIi8+PHBhdGggZD0iTTE1IDE3LjVjLTIuMy0xLjUtNC42LjEtMyAyLjMiLz48L2c+PC9zdmc+">
+<link rel="stylesheet" href="/tacet.css">
+<script src="/tacet.js" defer></script>
+</head><body>
+<div class="bar-top">
+  <a class="brand" href="#dash" title="Dashboard"><span class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4l5.4 6-4.4 3.2 5 4.3"/><path d="M15 17.5c-2.3-1.5-4.6.1-3 2.3"/></svg></span> Tacet</a>
+  <nav id="nav">
+    <a href="#dash" data-tab="dash"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg><span class="lbl">Dashboard</span></a>
+    <a href="#protection" data-tab="protection"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span class="lbl">Protection</span></a>
+    <a href="#whitelist" data-tab="whitelist"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="8.5 12 11 14.5 15.5 9.5"/></svg><span class="lbl">Whitelist</span></a>
+    <a href="#settings" data-tab="settings"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg><span class="lbl">Settings</span></a>
+  </nav>
+</div>
+
+<!-- ===================== DASHBOARD ===================== -->
+<section class="tab" id="tab-dash" hidden>
+  <div class="master" id="masterCard">
+    <div class="ms-l"><span class="ms-ico">&#9672;</span><div><div class="ms-t" id="masterTitle">&nbsp;</div><div class="ms-s" id="masterSub">&nbsp;</div></div></div>
+    <a class="ms-sw" id="masterSw" href="#" role="switch" aria-checked="true" title="Toggle all protection"><span class="ms-knob"></span></a>
+  </div>
+  <div class="tiles">
+    <div class="tile"><div class="v" id="tTotal">–</div><div class="k">banned now</div></div>
+    <div class="tile"><div class="v" id="tClosed">–</div><div class="k">closed-port bans</div></div>
+    <div class="tile"><div class="v" id="tOpen">–</div><div class="k">open-port bans</div></div>
+    <div class="tile"><div class="v" id="tDropped">–</div><div class="k">packets dropped today</div></div>
+  </div>
+  <div class="charts">
+    <div class="card">
+      <h2>Bans <span class="tag">last 12 hours</span></h2>
+      <div id="chartBox"><div class="empty">Loading&hellip;</div></div>
+    </div>
+    <div class="card">
+      <h2>Packets dropped <span class="tag">last 12 hours</span></h2>
+      <div id="dropsBox"><div class="empty">Loading&hellip;</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Top current connections</h2>
+    <div id="connsBox"><div class="empty">Loading&hellip;</div></div>
+  </div>
+</section>
+
+<!-- ===================== PROTECTION ===================== -->
+<section class="tab" id="tab-protection" hidden>
+  <div class="card">
+    <h2>Ban an address</h2>
+    <form class="ban" id="banForm">
+      <input type="text" name="ip" placeholder="1.2.3.4 or 45.10.0.0/16" pattern="^((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\.){3}(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])(/(3[0-2]|[12]?[0-9]))?$" required>
+      <button class="primary iconbtn" title="Ban" data-ic="ban"></button>
+    </form>
+  </div>
+  <div class="card">
+    <h2>Ban candidates</h2>
+    <div id="candBox"><div class="empty">Loading&hellip;</div></div>
+  </div>
+  <details id="catClosed">
+    <summary><span class="st">Closed-port bans</span><span class="cnt" id="closedCnt">–</span>
+      <a class="sumact" id="closedAll" title="Unban whole category" href="#" hidden data-ic="unban"></a>
+      <span class="chev">&#8250;</span></summary>
+    <div class="body"><div id="closedBox"></div></div>
+  </details>
+  <details id="catOpen">
+    <summary><span class="st">Open-port bans</span><span class="cnt" id="openCnt">–</span>
+      <a class="sumact" id="openAll" title="Unban whole category" href="#" hidden data-ic="unban"></a>
+      <span class="chev">&#8250;</span></summary>
+    <div class="body"><div id="openBox"></div></div>
+  </details>
+</section>
+
+<!-- ===================== WHITELIST ===================== -->
+<section class="tab" id="tab-whitelist" hidden>
+  <div class="card">
+    <h2>Whitelist an address</h2>
+    <form class="ban" id="wlForm">
+      <input type="text" name="ip" placeholder="160.79.104.0/21 Anthropic API" pattern="^((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\.){3}(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])(/(3[0-2]|[12]?[0-9]))?( \S.{0,95})?$" required>
+      <button class="primary iconbtn" title="Add" data-ic="white"></button>
+    </form>
+  </div>
+  <div class="card">
+    <h2>Entries</h2>
+    <div id="wlBox"><div class="empty">Loading&hellip;</div></div>
+  </div>
+</section>
+
+<!-- ===================== SETTINGS ===================== -->
+<section class="tab" id="tab-settings" hidden>
+<div class="settings">
+  <div class="smenu">
+    <a href="#" data-sec="general">General</a>
+    <a href="#" data-sec="ports">Ban rules</a>
+    <a href="#" data-sec="dropping">Packet dropping</a>
+    <a href="#" data-sec="databases">Databases</a>
+    <a href="#" data-sec="transfer">Backup &amp; Restore</a>
+    <a href="#" data-sec="logging">Logging</a>
+    <a href="#" data-sec="updates">Updates</a>
+  </div>
+  <div class="scontent">
+  <!-- novalidate: the form spans three settings sections and the inactive ones are
+       display:none — the browser's constraint validation can't focus a hidden
+       invalid field, so it silently blocked the submit with zero feedback. The
+       server validates every field and the UI surfaces its rejection instead. -->
+  <form id="cfgForm" novalidate>
+    <!-- GENERAL -->
+    <div class="ssec" data-sec="general">
+      <div class="card scard">
+        <div class="srow"><div class="slabel"><div class="sname">WAN interface</div>
+          <div class="shint">The uplink Tacet watches.</div></div>
+          <div class="sctl"><span class="field sel"><select name="wan" required></select></span></div></div>
+        <div class="srow"><div class="slabel"><div class="sname">Ban duration</div>
+          <div class="shint">A ban lasts this long after the last attempt. 1&ndash;720.</div></div>
+          <div class="sctl"><span class="field"><input type="text" name="ttlh" pattern="^[0-9]+$" inputmode="numeric" required><span class="u">hours</span></span></div></div>
+        <div class="srow"><div class="slabel"><div class="sname">Auto-refresh</div>
+          <div class="shint">Page refresh interval. 0 = off. 5&ndash;3600.</div></div>
+          <div class="sctl"><span class="field"><input type="text" name="refresh" pattern="^[0-9]+$" inputmode="numeric" required><span class="u">sec</span></span></div></div>
+        <div class="srow"><div class="slabel"><div class="sname">Color scheme</div>
+          <div class="shint">Auto follows the system.</div></div>
+          <div class="sctl"><div class="segmented" id="themeseg">
+            <button type="button" data-theme-val="auto">Auto</button>
+            <button type="button" data-theme-val="light">Light</button>
+            <button type="button" data-theme-val="dark">Dark</button>
+          </div></div></div>
+        <div class="srow"><div class="slabel"><div class="sname">Chart scale</div>
+          <div class="shint">Log keeps small bars visible next to bursts.</div></div>
+          <div class="sctl"><div class="segmented" id="scaleseg">
+            <button type="button" data-scale-val="log">Log</button>
+            <button type="button" data-scale-val="linear">Linear</button>
+          </div></div></div>
+      </div>
+    </div>
+    <!-- BAN RULES -->
+    <div class="ssec" data-sec="ports">
+      <div class="card scard">
+        <div class="scard-h"><div class="scard-t"><h2>Known-bad IPs</h2>
+          <p class="scard-d">Ban threat-listed IPs on first contact. Needs the threat database.</p></div>
+          <label class="sw"><input type="checkbox" name="tban"><span class="track"></span></label></div>
+      </div>
+      <div class="card scard">
+        <div class="scard-h"><div class="scard-t"><h2>Tor exit nodes</h2>
+          <p class="scard-d">Ban Tor exit relays on first contact. Needs the Tor exit list.</p></div>
+          <label class="sw"><input type="checkbox" name="torban"><span class="track"></span></label></div>
+      </div>
+      <div class="card scard">
+        <div class="scard-h"><div class="scard-t"><h2>Closed ports</h2>
+          <p class="scard-d">Ban sources knocking on ports nothing listens on.</p></div>
+          <label class="sw"><input type="checkbox" name="tclosed"><span class="track"></span></label></div>
+        <div class="srow" data-dep="tclosed"><div class="slabel"><div class="sname">Threshold</div>
+          <div class="shint">Lower is stricter. 1&ndash;3 may ban a stray retransmit.</div></div>
+          <div class="sctl"><span class="field"><input type="text" name="burst" pattern="^[0-9]+$" inputmode="numeric" required><span class="u">SYN/min</span></span></div></div>
+      </div>
+      <div class="card scard">
+        <div class="scard-h"><div class="scard-t"><h2>Forwarded ports</h2>
+          <p class="scard-d">Ban sources flooding a port you forward to a server.</p></div>
+          <label class="sw"><input type="checkbox" name="topen"><span class="track"></span></label></div>
+        <div class="srow" data-dep="topen"><div class="slabel"><div class="sname">Protected ports</div>
+          <div class="shint">Comma-separated TCP ports, e.g. 443,8443.</div></div>
+          <div class="sctl"><span class="field wide"><input type="text" name="svcports" pattern="^([0-9]{1,5})(,[0-9]{1,5})*$|^$"></span></div></div>
+        <div class="srow" data-dep="topen"><div class="slabel"><div class="sname">Threshold</div>
+          <div class="shint">Keep it high &mdash; real traffic lives here.</div></div>
+          <div class="sctl"><span class="field"><input type="text" name="svcburst" pattern="^[0-9]+$" inputmode="numeric" required><span class="u">SYN/min</span></span></div></div>
+      </div>
+      <div class="card scard">
+        <div class="srow"><div class="slabel"><div class="sname">Subnet size</div>
+          <div class="shint">Block size for the two subnet rules below. /24 = 256 addresses. 8&ndash;30.</div></div>
+          <div class="sctl"><span class="field snet"><span class="u">/</span><input type="text" name="snmask" pattern="^[0-9]+$" inputmode="numeric" required></span></div></div>
+      </div>
+      <div class="card scard">
+        <div class="scard-h"><div class="scard-t"><h2>Rate-ban blocks</h2>
+          <p class="scard-d">Ban a whole subnet when its combined rate trips the threshold.</p></div>
+          <label class="sw"><input type="checkbox" name="tsubnet"><span class="track"></span></label></div>
+        <div class="srow" data-dep="tsubnet"><div class="slabel"><div class="sname">Threshold</div>
+          <div class="shint">Whole-subnet rate. Keep it above the per-IP limits.</div></div>
+          <div class="sctl"><span class="field"><input type="text" name="snburst" pattern="^[0-9]+$" inputmode="numeric" required><span class="u">SYN/min</span></span></div></div>
+      </div>
+      <div class="card scard">
+        <div class="scard-h"><div class="scard-t"><h2>Fold crowded blocks</h2>
+          <p class="scard-d">Ban a whole subnet once this share of it is already banned.</p></div>
+          <label class="sw"><input type="checkbox" name="compact"><span class="track"></span></label></div>
+        <div class="srow" data-dep="compact"><div class="slabel"><div class="sname">Fold at</div>
+          <div class="shint">Banned share that folds the block. <span id="compactPrev" class="cprev"></span></div></div>
+          <div class="sctl"><span class="field"><input type="text" name="compactpct" pattern="^[0-9]+$" inputmode="numeric" required><span class="u">%</span></span></div></div>
+        <div class="srow" data-dep="compact"><div class="slabel"><div class="sname">Check every</div>
+          <div class="shint">Sweep interval.</div></div>
+          <div class="sctl"><span class="field"><input type="text" name="compactevery" pattern="^[0-9]+$" inputmode="numeric" required><span class="u">min</span></span></div></div>
+      </div>
+    </div>
+    <!-- PACKET DROPPING -->
+    <div class="ssec" data-sec="dropping">
+      <div class="card scard">
+        <div class="srow"><div class="slabel"><div class="sname">Dropping policy</div>
+          <div class="shint">How packets from banned sources are refused.</div></div>
+          <div class="sctl"><div class="segmented" id="rejectseg">
+            <button type="button" data-reject-val="drop">Drop</button>
+            <button type="button" data-reject-val="reject">Reject</button>
+          </div></div></div>
+        <div class="srow"><div class="slabel"><div class="sname">Half-open timeout</div>
+          <div class="shint">Dropped attempts leave the connection table after this long. 10&ndash;120.</div></div>
+          <div class="sctl"><span class="field"><input type="text" name="synto" pattern="^[0-9]+$" inputmode="numeric" required><span class="u">sec</span></span></div></div>
+      </div>
+    </div>
+    <div class="sfoot"><button class="primary sapply" title="Save settings">Apply changes</button></div>
+  </form>
+  <!-- DATABASES -->
+  <div class="ssec" data-sec="databases">
+    <div class="card scard">
+      <div class="srow"><div class="slabel"><div class="sname">GeoIP database</div>
+        <div class="shint" id="geoSub">&nbsp;</div></div>
+        <div class="sctl"><a class="btn" id="geoBtn" href="#" title="Download or refresh the country database (background)">Update</a></div></div>
+      <div class="srow"><div class="slabel"><div class="sname">Threat database</div>
+        <div class="shint" id="threatSub">&nbsp;</div></div>
+        <div class="sctl"><a class="btn" id="threatBtn" href="#" title="Download or refresh the threat list (background)">Update</a></div></div>
+      <div class="srow"><div class="slabel"><div class="sname">ASN database</div>
+        <div class="shint" id="asnSub">&nbsp;</div></div>
+        <div class="sctl"><a class="btn" id="asnBtn" href="#" title="Download or refresh the IP→network-owner database (background)">Update</a></div></div>
+      <div class="srow"><div class="slabel"><div class="sname">Tor exit list</div>
+        <div class="shint" id="torSub">&nbsp;</div></div>
+        <div class="sctl"><a class="btn" id="torBtn" href="#" title="Download or refresh the Tor exit-relay list (background)">Update</a></div></div>
+      <div class="srow"><div class="slabel"><div class="sname">Auto-update</div>
+        <div class="shint">Refresh all sources once a day.</div></div>
+        <div class="sctl"><label class="sw"><input type="checkbox" id="autoDb"><span class="track"></span></label></div></div>
+      <div class="scredit">Data: <a href="https://db-ip.com" target="_blank" rel="noopener">IP Geolocation by DB-IP</a> (CC&nbsp;BY&nbsp;4.0)
+        &middot; <a href="https://github.com/stamparm/ipsum" target="_blank" rel="noopener">IPsum</a>
+        &middot; <a href="https://www.blocklist.de" target="_blank" rel="noopener">blocklist.de</a>
+        &middot; <a href="https://cinsscore.com" target="_blank" rel="noopener">CINS</a>
+        &middot; <a href="https://greensnow.co" target="_blank" rel="noopener">GreenSnow</a>
+        &middot; <a href="https://abuse.ch" target="_blank" rel="noopener">abuse.ch</a>
+        &middot; <a href="https://check.torproject.org" target="_blank" rel="noopener">Tor Project</a></div>
+    </div>
+  </div>
+  <!-- BACKUP & RESTORE -->
+  <div class="ssec" data-sec="transfer">
+    <div class="card scard">
+      <div class="scard-h"><div class="scard-t"><h2>Backup</h2>
+        <p class="scard-d">Download the selected data as a JSON file.</p></div></div>
+      <div class="srow"><div class="slabel"><div class="sname">Settings</div>
+        <div class="shint">Every option from every section.</div></div>
+        <div class="sctl"><label class="sw"><input type="checkbox" id="expConfig" checked><span class="track"></span></label></div></div>
+      <div class="srow"><div class="slabel"><div class="sname">Whitelist</div>
+        <div class="shint">Trusted addresses and subnets.</div></div>
+        <div class="sctl"><label class="sw"><input type="checkbox" id="expWl" checked><span class="track"></span></label></div></div>
+      <div class="srow"><div class="slabel"><div class="sname">Ban lists</div>
+        <div class="shint">All four categories, with remaining idle-outs.</div></div>
+        <div class="sctl"><label class="sw"><input type="checkbox" id="expBans" checked><span class="track"></span></label></div></div>
+      <div class="srow"><div class="slabel"><div class="shint" id="expHint">&nbsp;</div></div>
+        <div class="sctl"><a class="btn primary" id="expBtn" href="#" title="Download the selected data">Download</a></div></div>
+    </div>
+    <div class="card scard">
+      <div class="scard-h"><div class="scard-t"><h2>Restore</h2>
+        <p class="scard-d">Load data back from a backup file.</p></div></div>
+      <div class="srow"><div class="slabel"><div class="sname">File</div>
+        <div class="shint">A tacet backup JSON.</div></div>
+        <div class="sctl"><div class="filepick">
+          <a class="btn" id="impPick" href="#">Choose file</a>
+          <div class="fname" id="impName">No file chosen</div>
+          <input type="file" id="impFile" accept=".json,application/json" hidden>
+        </div></div></div>
+      <div class="srow"><div class="slabel"><div class="sname">Mode</div>
+        <div class="shint">Append adds entries; override replaces whole sections.</div></div>
+        <div class="sctl"><div class="segmented" id="impseg">
+          <button type="button" data-imp-val="append" class="on">Append</button>
+          <button type="button" data-imp-val="override">Override</button>
+        </div></div></div>
+      <div class="srow"><div class="slabel"><div class="shint" id="impHint">&nbsp;</div></div>
+        <div class="sctl"><a class="btn primary" id="impBtn" href="#" title="Restore from the chosen file">Restore</a></div></div>
+    </div>
+  </div>
+  <!-- LOGGING -->
+  <div class="ssec" data-sec="logging">
+    <div class="card scard">
+      <div class="scard-h"><div class="scard-t"><h2>Logging level</h2>
+        <p class="scard-d">What Tacet records to the event log.</p></div>
+        <div class="segmented" id="logseg">
+          <button type="button" data-log-val="off">Off</button>
+          <button type="button" data-log-val="normal">Normal</button>
+          <button type="button" data-log-val="verbose">Verbose</button>
+        </div></div>
+    </div>
+    <div class="card"><h2><span>Event log</span>
+      <a class="btn" id="clearBtn" href="#" title="Delete all recorded events" hidden>Clear log</a></h2>
+      <div id="evBox"><div class="empty">Loading&hellip;</div></div>
+    </div>
+  </div>
+  <!-- UPDATES -->
+  <div class="ssec" data-sec="updates">
+    <div class="card scard">
+      <div class="srow"><div class="slabel"><div class="sname">Installed version</div>
+        <div class="shint">Tacet running on this router.</div></div>
+        <div class="sctl"><span class="ver" id="verChip">&ndash;</span></div></div>
+      <div class="srow"><div class="slabel"><div class="sname">Latest release</div>
+        <div class="shint" id="updHint">Not checked yet.</div></div>
+        <div class="sctl" id="updCtl"></div></div>
+    </div>
+  </div>
+  </div>
+</div>
+</section>
+
+<footer>Tacet <span id="verFoot"></span> &middot; &copy; Max Grakov 2026 &middot; MIT License
+  <span class="t" id="updFoot"></span></footer>
+</body></html>

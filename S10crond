@@ -1,0 +1,8 @@
+#!/bin/sh
+ENABLED=yes
+PROCS=crond
+ARGS="-b -c /opt/var/spool/cron/crontabs"
+PREARGS=""
+DESC=$PROCS
+PATH=/opt/sbin:/opt/bin:/usr/sbin:/usr/bin:/sbin:/bin
+. /opt/etc/init.d/rc.func

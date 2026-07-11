@@ -1,0 +1,53 @@
+#!/bin/sh
+# Tacet UI on http://192.168.1.1:5050 (its own lighttpd instance)
+CONF=/opt/etc/lighttpd-tacet.conf
+PIDF=/opt/var/run/lighttpd-tacet.pid
+
+# /opt/var/run is on flash, so the pidfile SURVIVES a power loss and its PID may
+# now belong to an unrelated process — including the stock Entware lighttpd.
+# Only trust it when that PID is really OUR lighttpd: match the conf path in
+# cmdline (busybox grep reads through the NUL separators), not just "lighttpd",
+# or stop/restart could kill the user's other web server.
+pid_alive() {
+    p=$(cat $PIDF 2>/dev/null); [ -n "$p" ] || return 1
+    grep -q "lighttpd-tacet.conf" "/proc/$p/cmdline" 2>/dev/null
+}
+
+case "$1" in
+    start)
+        mkdir -p /opt/var/run /opt/var/log
+        pid_alive && { echo "tacet-ui already running"; exit 0; }
+        rm -f $PIDF   # stale leftover from a power loss
+        # retry a few times: at boot the LAN address the conf binds to may not be
+        # up yet, and a bind failure is fatal for lighttpd. Fail LOUDLY — the old
+        # form just skipped the echo and exited 0 with no UI and no clue.
+        n=0
+        until /opt/sbin/lighttpd -f $CONF; do
+            n=$((n+1))
+            [ "$n" -ge 3 ] && { echo "tacet-ui FAILED to start — check the bind address in $CONF" >&2; exit 1; }
+            sleep 2
+        done
+        echo "tacet-ui started"
+        ;;
+    stop)
+        pid_alive && kill "$(cat $PIDF)" 2>/dev/null
+        rm -f $PIDF
+        ;;
+    restart)
+        "$0" stop
+        # wait for the port to actually free up — a fixed 1 s sometimes loses the
+        # race and the new instance dies on bind (fatal for lighttpd)
+        P=$(sed -n 's/^server.port[^0-9]*\([0-9]*\).*/\1/p' $CONF | head -1)
+        n=0
+        while [ $n -lt 5 ] && netstat -tln 2>/dev/null | grep -q ":${P:-5050} "; do
+            sleep 1; n=$((n+1))
+        done
+        "$0" start
+        ;;
+    status)
+        pid_alive && echo running || echo stopped
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart|status}"
+        ;;
+esac
